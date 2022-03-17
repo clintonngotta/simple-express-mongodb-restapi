@@ -1,0 +1,19 @@
+{
+  "name": "fleet-simplify-test",
+  "version": "1.0.0",
+  "description": "test for NodeJs backend with MongoDb with public and provate routes",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \\\"Error: no test specified\\\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/clintonngotta/fleet-simplify-test.git"
+  },
+  "author": "Clinton Ngotta",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/clintonngotta/fleet-simplify-test/issues"
+  },
+  "homepage": "https://github.com/clintonngotta/fleet-simplify-test#readme"
+}

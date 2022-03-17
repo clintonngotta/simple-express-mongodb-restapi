@@ -1,6 +1,7 @@
 const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcrypt");
-
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 // import models
 const usersModel = require("../models/Users");
 
@@ -17,7 +18,23 @@ const loginUser = async (req, res) => {
   if (!validPassword) {
     return res.status(400).send("Incorrect email or password.");
   }
-  res.send("loggedIn Successfully");
+  const UserData = {
+    password: req.body.password,
+    username: req.body.username,
+  };
+  jwt.sign(
+    {
+      UserData,
+    },
+    process.env.APP_SCRET_KEY,
+    (err, token) => {
+      res.json({
+        token: token,
+        message: "LoggedIn Successfully",
+        username: req.body.username,
+      });
+    }
+  );
 };
 
 const registerUser = async (req, res) => {

@@ -1,10 +1,12 @@
 // import models
 const usersModel = require("../models/Users");
+const jwt = require("jsonwebtoken");
 
 const getAllUsers = (req, res) => {
   usersModel
     .find()
     .then(function (users) {
+      console.log(users);
       if (users) {
         res.status(200).json(users);
       } else {
@@ -21,20 +23,29 @@ const getAllUsers = (req, res) => {
 };
 
 const getSingleUser = (req, res) => {
-  usersModel
-    .findById(req.params.id)
-    .then(function (user) {
-      if (user) {
-        res.status(200).json(user);
-      } else {
-        res.status(404).json({ message: "error occured" });
-      }
-    })
-    .catch((error) => {
-      if (error) {
-        throw error;
-      }
+  const verify = verifyToken(req);
+  if (verify !== "Invalid Or No Access Token") {
+    usersModel
+      .findById(req.params.id)
+      .then(function (user) {
+        if (user) {
+          res.status(200).json(user);
+        } else {
+          res.status(404).json({ message: "error occured" });
+        }
+      })
+      .catch((error) => {
+        if (error) {
+          throw error;
+        }
+      });
+  } else {
+    res.json({
+      message: "FORBIDDEN",
+      code: 403,
+      errors: verify,
     });
+  }
 };
 
 const followOtherUsers = async (req, res) => {
@@ -121,6 +132,34 @@ const unFollowOtherUsers = async (req, res) => {
     res.status(500).json({ message: "specify user" });
   }
 };
+
+function verifyToken(req) {
+  // Get auth header value
+  const bearerHeader = req.headers["authorization"];
+  let verify = "";
+  // Check if bearer is undefined
+  if (typeof bearerHeader !== "undefined") {
+    // Split at the space
+    const bearer = bearerHeader.split(" ");
+    // Get token from array
+    const bearerToken = bearer[1];
+    // Set the token
+    // return req.token = bearerToken;
+
+    if (bearerToken) {
+      jwt.verify(bearerToken, process.env.APP_SCRET_KEY, (err, authData) => {
+        if (err) {
+          verify = "Invalid Or No Access Token";
+        } else {
+          verify = bearerToken;
+        }
+      });
+    }
+  } else {
+    verify = "Invalid Or No Access Token";
+  }
+  return verify;
+}
 
 module.exports = {
   getAllUsers,

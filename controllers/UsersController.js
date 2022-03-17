@@ -21,7 +21,20 @@ const getAllUsers = (req, res) => {
 };
 
 const getSingleUser = (req, res) => {
-  res.send({ user: [] });
+  usersModel
+    .findById(req.params.id)
+    .then(function (user) {
+      if (user) {
+        res.status(200).json(user);
+      } else {
+        res.status(404).json({ message: "error occured" });
+      }
+    })
+    .catch((error) => {
+      if (error) {
+        throw error;
+      }
+    });
 };
 
 module.exports = {

@@ -1,5 +1,6 @@
 const { validationResult } = require("express-validator");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 // import models
 const postsModel = require("../models/Posts");
@@ -22,20 +23,29 @@ const getAllPosts = (req, res) => {
 };
 
 const getSinglePost = async (req, res) => {
-  postsModel
-    .findById(req.params.id)
-    .then(function (post) {
-      if (post) {
-        res.status(200).json(post);
-      } else {
-        res.status(404).json({ message: "error occured" });
-      }
-    })
-    .catch((error) => {
-      if (error) {
-        throw error;
-      }
+  const verify = verifyToken(req);
+  if (verify !== "Invalid Or No Access Token") {
+    postsModel
+      .findById(req.params.id)
+      .then(function (post) {
+        if (post) {
+          res.status(200).json(post);
+        } else {
+          res.status(404).json({ message: "error occured" });
+        }
+      })
+      .catch((error) => {
+        if (error) {
+          throw error;
+        }
+      });
+  } else {
+    res.json({
+      message: "FORBIDDEN",
+      code: 403,
+      errors: verify,
     });
+  }
 };
 
 const createNewPost = async (req, res) => {
@@ -226,6 +236,33 @@ const commentOnPost = async (req, res) => {
     });
 };
 
+function verifyToken(req) {
+  // Get auth header value
+  const bearerHeader = req.headers["authorization"];
+  let verify = "";
+  // Check if bearer is undefined
+  if (typeof bearerHeader !== "undefined") {
+    // Split at the space
+    const bearer = bearerHeader.split(" ");
+    // Get token from array
+    const bearerToken = bearer[1];
+    // Set the token
+    // return req.token = bearerToken;
+
+    if (bearerToken) {
+      jwt.verify(bearerToken, process.env.APP_SCRET_KEY, (err, authData) => {
+        if (err) {
+          verify = "Invalid Or No Access Token";
+        } else {
+          verify = bearerToken;
+        }
+      });
+    }
+  } else {
+    verify = "Invalid Or No Access Token";
+  }
+  return verify;
+}
 module.exports = {
   getAllPosts,
   getSinglePost,

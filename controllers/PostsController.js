@@ -96,21 +96,134 @@ const deletePost = (req, res) => {
 };
 
 const likePost = async (req, res) => {
-  res.send(req.params.id);
-  // postsModel
-  //   .findById(req.params.id)
-  //   .then(function (post) {
-  //     if (post) {
-  //       res.status(200).json(post);
-  //     } else {
-  //       res.status(404).json({ message: "error occured" });
-  //     }
-  //   })
-  //   .catch((error) => {
-  //     if (error) {
-  //       throw error;
-  //     }
-  //   });
+  if (req.body.user) {
+    postsModel
+      .findById(req.params.id)
+      .then(function (post) {
+        if (post) {
+          let newPost = post;
+          if (newPost.likedBy.length > 0) {
+            if (newPost.likedBy.includes(req.body.user)) {
+              res.status(500).json({ message: "You already liked this post" });
+            } else {
+              newPost.likedBy.push(req.body.user);
+            }
+          } else {
+            newPost["likedBy"] = [req.body.user];
+          }
+          postsModel.updateOne(
+            { _id: req.params.id },
+            newPost,
+            function (err, update) {
+              err === null
+                ? res.status(200).json(newPost)
+                : res.status(500).json({
+                    message: "error occured, could not post comment",
+                  });
+            }
+          );
+        } else {
+          res.status(404).json({ message: "post not found" });
+        }
+      })
+      .catch((error) => {
+        if (error) {
+          throw error;
+        }
+      });
+  } else {
+    res.status(500).json({ message: "specify user" });
+  }
+};
+
+const unLikePost = async (req, res) => {
+  if (req.body.user) {
+    postsModel
+      .findById(req.params.id)
+      .then(function (post) {
+        if (post) {
+          let newPost = post;
+          if (newPost.likedBy.includes(req.body.user)) {
+            newPost.likedBy = newPost.likedBy.filter(
+              (likes) => likes !== req.body.user
+            );
+            postsModel.updateOne(
+              { _id: req.params.id },
+              newPost,
+              function (err, update) {
+                err === null
+                  ? res.status(200).json(newPost)
+                  : res.status(500).json({
+                      message: "error occured, could not post comment",
+                    });
+              }
+            );
+          } else {
+            res.status(500).json({ message: "You have not liked this post" });
+          }
+        } else {
+          res.status(404).json({ message: "post not found" });
+        }
+      })
+      .catch((error) => {
+        if (error) {
+          throw error;
+        }
+      });
+  } else {
+    res.status(500).json({ message: "specify user" });
+  }
+};
+
+const commentOnPost = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  let val = {
+    commentBy: "clintonngotta",
+    comment: "Awesome New post",
+    commentedOn: "2022-03-17T09:52:28.790Z",
+  };
+
+  postsModel
+    .findById(req.params.id)
+    .then(function (post) {
+      let newPost = post;
+      let newComment = {
+        commentBy: req.body.commentBy,
+        comment: req.body.comment,
+        commentedOn: new Date(Date.now()),
+      };
+
+      if (newPost) {
+        if (Object.keys(newPost.comments).length > 0) {
+          let addToNewComment = [newPost["comments"], newComment];
+          newPost["comments"] = addToNewComment;
+        } else {
+          newPost["comments"] = newComment;
+        }
+        postsModel.updateOne(
+          { _id: req.params.id },
+          newPost,
+          function (err, update) {
+            err === null
+              ? res.status(200).json(newPost)
+              : res.status(500).json({
+                  message: "error occured, could not post comment",
+                });
+          }
+        );
+      } else {
+        res.status(404).json({ message: "post not found" });
+      }
+    })
+    .catch((error) => {
+      if (error) {
+        throw error;
+      }
+    });
 };
 
 module.exports = {
@@ -120,4 +233,6 @@ module.exports = {
   updatePost,
   deletePost,
   likePost,
+  unLikePost,
+  commentOnPost,
 };

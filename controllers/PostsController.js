@@ -21,9 +21,21 @@ const getAllPosts = (req, res) => {
     });
 };
 
-const getSinglePost = async (req, res, next) => {
-  let post = await getPost(req, res, next);
-  res.send(post);
+const getSinglePost = async (req, res) => {
+  postsModel
+    .findById(req.params.id)
+    .then(function (post) {
+      if (post) {
+        res.status(200).json(post);
+      } else {
+        res.status(404).json({ message: "error occured" });
+      }
+    })
+    .catch((error) => {
+      if (error) {
+        throw error;
+      }
+    });
 };
 
 const createNewPost = async (req, res) => {
@@ -59,7 +71,6 @@ const updatePost = async (req, res) => {
     .catch((error) => {
       if (error) {
         throw error;
-        res.json(err);
       }
     });
 };
@@ -84,25 +95,29 @@ const deletePost = (req, res) => {
     });
 };
 
-async function getPost(req, res, next) {
-  let post;
-  try {
-    post = await postsModel.findById(req.params.id);
-    console.log(post);
-    if (post == null) {
-      return res.status(404).json({ message: "Cannot find post" });
-    }
-  } catch (err) {
-    return res.status(500).json({ message: err.message });
-  }
+const likePost = async (req, res) => {
+  res.send(req.params.id);
+  // postsModel
+  //   .findById(req.params.id)
+  //   .then(function (post) {
+  //     if (post) {
+  //       res.status(200).json(post);
+  //     } else {
+  //       res.status(404).json({ message: "error occured" });
+  //     }
+  //   })
+  //   .catch((error) => {
+  //     if (error) {
+  //       throw error;
+  //     }
+  //   });
+};
 
-  res.post = post;
-  next();
-}
 module.exports = {
   getAllPosts,
   getSinglePost,
   createNewPost,
   updatePost,
   deletePost,
+  likePost,
 };

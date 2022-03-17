@@ -6,13 +6,11 @@ const PostSchema = new mongoose.Schema(
     author: { type: String, required: true },
     description: { type: String, required: true },
     comments: {
-      commentBy: { type: mongoose.Schema.Types.ObjectId },
+      commentBy: String,
       comment: String,
-      commentedOn: { type: Date },
+      commentedOn: { type: Date, default: Date.now },
     },
-    likes: {
-      likedBy: { type: mongoose.Schema.Types.ObjectId },
-    },
+    likedBy: Array,
     status: { type: String, enum: ["active", "inactive"], default: "active" },
   },
   { timestamps: true }

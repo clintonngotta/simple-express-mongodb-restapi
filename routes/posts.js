@@ -18,5 +18,14 @@ router.post(
 router.patch("/update/:id", PostsController.updatePost);
 router.delete("/delete/:id", PostsController.deletePost);
 router.post("/like/:id", PostsController.likePost);
+router.post("/unlike/:id", PostsController.unLikePost);
+router.post(
+  "/comment/:id",
+  body("commentBy")
+    .exists()
+    .withMessage("user commenting on post is Requiered"),
+  body("comment").exists().withMessage("comment cannot be empty"),
+  PostsController.commentOnPost
+);
 
 module.exports = router;

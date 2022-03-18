@@ -9,10 +9,10 @@ This is s a simple RESTFUL API build with NodeJs and MongoDb hosted on Herokuart
 ## GETTING STARTED
 Login in to MongoDb and create a cluster then white list your ip. Save the database connect credntials and set them in the .env as follows
 
-DB_CLUSTER
-DB_NAME
-DB_USER
-DB_PASSWORDI
+DB_CLUSTER=yourclustername,  
+DB_NAME=yourdb,  
+DB_USER=yourdbuser,  
+DB_PASSWORD=yourdbpassword  
 
 ## USERS
 Get All users and single user from the database over a protected route, follow and unfolow users.
